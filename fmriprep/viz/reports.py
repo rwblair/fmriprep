@@ -9,15 +9,13 @@ import jinja2
 from pkg_resources import resource_filename as pkgrf
 
 class Element(object):
-    
+
     def __init__(self, name, file_pattern, title, description):
         self.name = name
         self.file_pattern = re.compile(file_pattern)
         self.title = title
         self.description = description
-        self.files = []
         self.files_contents = []
-        self.files_subjects = []
 
 
 class SubReport(object):
@@ -68,11 +66,13 @@ class Report(object):
                 for sub_report in self.sub_reports:
                     for element in sub_report.elements:
                         if element.file_pattern.search(f) and f.split('.')[-1] == 'svg':
-                            element.files.append(f)
                             with open(f) as fp:
                                 content = fp.read()
                                 content = '\n'.join(content.split('\n')[1:])
                                 element.files_contents.append((f, content))
+        for sub_report in self.sub_reports:
+            for element in sub_report.elements:
+                element.files_contents.sort()
 
     def generate_report(self):
         searchpath = pkgrf('fmriprep', '/')
