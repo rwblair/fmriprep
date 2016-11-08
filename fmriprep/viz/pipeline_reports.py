@@ -46,9 +46,9 @@ def stripped_brain_overlay(in_file, overlay_file, out_file):
     mask_display = plot_roi(
         in_file, overlay_file, output_file=out_file, title=out_file,
         display_mode="ortho", dim=-1, alpha=.3, vmax=vmax + 1)
-    #  mask_display.bg_img(overlay_file)
-    #  mask_display.title(out_file, x=0.01, y=0.99, size=15, color=None,
-    #                     bgcolor=None, alpha=1)
-    #  mask_display.display_mode = "yx"
-    mask_display
+    in_file_display = plot_img(in_file, display_mode="ortho",
+                               output_file='in_file_{}'.format(out_file),)
+    overlay_file_display = plot_img(in_file, display_mode="ortho",
+                               output_file='overlay_file_{}'.format(out_file),)
+    
     return os.path.abspath(out_file)
