@@ -17,6 +17,7 @@ from nipype.interfaces import c3
 from nipype.interfaces import fsl
 from nipype.interfaces import io as nio
 from nipype.interfaces import utility as niu
+from nipype.interfaces.ants.preprocess import AntsMotionCorr
 from niworkflows.interfaces.masks import ComputeEPIMask, BETRPT
 from niworkflows.interfaces.registration import FLIRTRPT
 from niworkflows.data import get_mni_icbm152_nlin_asym_09c
@@ -25,9 +26,7 @@ from fmriprep.interfaces import DerivativesDataSink, FormatHMCParam
 from fmriprep.interfaces.utils import nii_concat
 from fmriprep.utils.misc import fix_multi_T1w_source_name, _first
 from fmriprep.workflows.fieldmap import sdc_unwarp
-from fmriprep.viz import stripped_brain_overlay
 from fmriprep.workflows.sbref import _extract_wm
-
 
 # pylint: disable=R0914
 def epi_hmc(name='EPI_HMC', settings=None):
@@ -44,6 +43,23 @@ def epi_hmc(name='EPI_HMC', settings=None):
     # Head motion correction (hmc)
     hmc = pe.Node(fsl.MCFLIRT(
         save_mats=True, save_plots=True, mean_vol=True), name='EPI_hmc')
+    ants_mean = pe.Node(AntsMotionCorr(), name='ANTS_mean')
+    ants_hmc_config = {
+        'metric_type': 'GC',
+        'metric_weight': 1,
+        'radius_or_bins': 1,
+        'sampling_strategy': "Random",
+        'sampling_percentage': 0.05,
+        'iterations': 10,
+        'smoothing_sigmas': 0,
+        'shrink_factors': 1,
+        'n_images': 10,
+        'use_fixed_reference_image': True,
+        'use_scales_estimator': True
+    }
+
+    ants_hmc = pe.Node(AntsMotionCorr(**ants_hmc_config),
+                       name='EPI_ANTS_hmc')
     hmc.interface.estimated_memory_gb = settings["biggest_epi_file_size_gb"] * 3
 
     hcm2itk = pe.MapNode(c3.C3dAffineTool(fsl2ras=True, itk_transform=True),
@@ -61,6 +77,9 @@ def epi_hmc(name='EPI_HMC', settings=None):
 
     workflow.connect([
         (inputnode, hmc, [('epi', 'in_file')]),
+        (inputnode, ants_mean, [('epi', 'average_image')]),
+        (ants_mean, ants_hmc, [('average_image', 'fixed_image')]),
+        (inputnode, ants_hmc, [('epi', 'moving_image')]),
         (hmc, hcm2itk, [('mat_file', 'transform_file'),
                         ('mean_img', 'source_file'),
                         ('mean_img', 'reference_file')]),
@@ -183,7 +202,7 @@ def ref_epi_t1_registration(reportlet_suffix, inv_ds_suffix, name='ref_epi_t1_re
         (inputnode, wm_mask, [('t1_seg', 'in_file')]),
         (inputnode, explicit_mask_epi, [('ref_epi', 'in_file'),
                                         ('ref_epi_mask', 'mask_file')
-                                        ]),
+                                       ]),
         (explicit_mask_epi, flt_bbr_init, [('out_file', 'in_file')]),
         (inputnode, flt_bbr_init, [('t1_brain', 'reference')]),
         (inputnode, fsl2itk_fwd, [('bias_corrected_t1', 'reference_file'),
@@ -243,7 +262,7 @@ def epi_sbref_registration(settings, name='EPI_SBrefRegistration'):
 
     ds_report = pe.Node(
         DerivativesDataSink(base_directory=settings['output_dir'],
-                            suffix='epi_sbref', out_path_base='reports'), 
+                            suffix='epi_sbref', out_path_base='reports'),
         name="DS_Report")
 
     workflow.connect([
@@ -310,7 +329,7 @@ def epi_mni_transformation(name='EPIMNITransformation', settings=None):
                                  output_names=["merged_file"],
                                  function=nii_concat), name='MergeEPI')
     merge.interface.estimated_memory_gb = settings[
-                                              "biggest_epi_file_size_gb"] * 3
+        "biggest_epi_file_size_gb"] * 3
 
     mask_merge_tfms = pe.Node(niu.Merge(2), name='MaskMergeTfms')
     mask_mni_tfm = pe.Node(

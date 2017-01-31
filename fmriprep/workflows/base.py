@@ -25,6 +25,7 @@ from fmriprep.workflows.epi import (
     epi_unwarp, epi_hmc, epi_sbref_registration,
     ref_epi_t1_registration, epi_mni_transformation)
 
+from fmriprep.workflows.test_ants import test_ants
 
 def base_workflow_enumerator(subject_list, task_id, settings):
     workflow = pe.Workflow(name='workflow_enumerator')
@@ -49,14 +50,18 @@ def base_workflow_generator(subject_id, task_id, settings):
     subject_data = collect_bids_data(settings['bids_root'], subject_id, task_id)
 
     settings["biggest_epi_file_size_gb"] = get_biggest_epi_file_size_gb(subject_data['func'])
-
+    
     if subject_data['t1w'] == []:
         raise Exception("No T1w images found for participant %s. All workflows require T1w images."%subject_id)
 
+    test_ants(subject_data, settings)
+
+    '''
     if subject_data['fmap'] != [] and subject_data['sbref'] != [] and "fieldmaps" not in settings['ignore']:
         return wf_ds054_type(subject_data, settings, name=subject_id)
     else:
         return wf_ds005_type(subject_data, settings, name=subject_id)
+    '''
 
 
 
