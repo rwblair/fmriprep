@@ -17,7 +17,7 @@ from nipype.interfaces import c3
 from nipype.interfaces import fsl
 from nipype.interfaces import io as nio
 from nipype.interfaces import utility as niu
-from nipype.interfaces.ants.preprocess import AntsMotionCorr
+from nipype.interfaces.ants.preprocess import AntsMotionCorr, AntsMatrixConversion
 from niworkflows.interfaces.masks import ComputeEPIMask, BETRPT
 from niworkflows.interfaces.registration import FLIRTRPT
 from niworkflows.data import get_mni_icbm152_nlin_asym_09c
@@ -43,6 +43,8 @@ def epi_hmc(name='EPI_HMC', settings=None):
     # Head motion correction (hmc)
     hmc = pe.Node(fsl.MCFLIRT(
         save_mats=True, save_plots=True, mean_vol=True), name='EPI_hmc')
+    hmc.interface.estimated_memory_gb = settings["biggest_epi_file_size_gb"] * 3
+
     ants_mean = pe.Node(AntsMotionCorr(), name='ANTS_mean')
     ants_hmc_config = {
         'metric_type': 'GC',
@@ -55,12 +57,17 @@ def epi_hmc(name='EPI_HMC', settings=None):
         'shrink_factors': 1,
         'n_images': 10,
         'use_fixed_reference_image': True,
-        'use_scales_estimator': True
+        'use_scales_estimator': True,
+        'output_warped_image': 'warped.nii.gz',
+        'output_transform_prefix': 'motcorr',
+        'transformation_model': 'Affine',
+        'gradient_step_length': 0.005
     }
 
     ants_hmc = pe.Node(AntsMotionCorr(**ants_hmc_config),
                        name='EPI_ANTS_hmc')
-    hmc.interface.estimated_memory_gb = settings["biggest_epi_file_size_gb"] * 3
+
+    ants_mat_conv = pe.Node(AntsMatrixConversion(), name='EPI_ANTS_mat_conv')
 
     hcm2itk = pe.MapNode(c3.C3dAffineTool(fsl2ras=True, itk_transform=True),
                          iterfield=['transform_file'], name='hcm2itk')
@@ -80,20 +87,27 @@ def epi_hmc(name='EPI_HMC', settings=None):
         (inputnode, ants_mean, [('epi', 'average_image')]),
         (ants_mean, ants_hmc, [('average_image', 'fixed_image')]),
         (inputnode, ants_hmc, [('epi', 'moving_image')]),
-        (hmc, hcm2itk, [('mat_file', 'transform_file'),
-                        ('mean_img', 'source_file'),
-                        ('mean_img', 'reference_file')]),
-        (hcm2itk, outputnode, [('itk_transform', 'xforms')]),
-        (hmc, outputnode, [('out_file', 'epi_hmc'),
-                           ('par_file', 'movpar_file'),
-                           ('mean_img', 'epi_mean')]),
-        (hmc, avscale, [('mat_file', 'mat_file')]),
-        (avscale, avs_format, [('translations', 'translations'),
-                               ('rot_angles', 'rot_angles')]),
-        (hmc, inu, [('mean_img', 'input_image')]),
+        #(hmc, hcm2itk, [('mat_file', 'transform_file'),
+        #                ('mean_img', 'source_file'),
+        #                ('mean_img', 'reference_file')]),
+        #(hcm2itk, outputnode, [('itk_transform', 'xforms')]),
+        (ants_hmc, outputnode, [('composite_transform', 'xforms')]),
+        #(hmc, outputnode, [('out_file', 'epi_hmc'),
+        #                   ('par_file', 'movpar_file'),
+        #                   ('mean_img', 'epi_mean')]),
+        (ants_hmc, outputnode, [('warped_image', 'epi_hmc')]),
+        (ants_mean, outputnode, [('mean_img', 'epi_mean')]),
+        (ants_hmc, ants_mat_conv, [('composite_transform', 'matrix')]),
+        (ants_mat_conv, outputnode, [('parameters', 'par_file')]),
+        #(hmc, avscale, [('mat_file', 'mat_file')]),
+        #(avscale, avs_format, [('translations', 'translations'),
+        #                       ('rot_angles', 'rot_angles')]),
+        #(hmc, inu, [('mean_img', 'input_image')]),
+        (ants_mean, inu, [('average_image', 'input_image')]),
         (inu, skullstrip_epi, [('output_image', 'in_file')]),
-        (hmc, avscale, [('mean_img', 'ref_file')]),
-        (avs_format, outputnode, [('out_file', 'motion_confounds_file')]),
+        #(hmc, avscale, [('mean_img', 'ref_file')]),
+        #(ants_mean, avscale, [('average_image', 'ref_file')]),
+        (ants_mat_conv, outputnode, [('parameters', 'motion_confounds_file')]),
         (skullstrip_epi, outputnode, [('mask_file', 'epi_mask')]),
     ])
 
@@ -109,9 +123,17 @@ def epi_hmc(name='EPI_HMC', settings=None):
         name='DS_Report'
     )
 
+    ds_warped = pe.Node(
+        DerivativesDataSink(base_directory=settings['output_dir'],
+                            suffix="ants_hmc"),
+        name='DS_ANTS'
+    )
+
     workflow.connect([
         (inputnode, ds_report, [('epi', 'source_file')]),
         (inputnode, ds_mask, [('epi', 'source_file')]),
+        (inputnode, ds_warped, [('epi', 'source_file')]),
+        (ants_hmc, ds_warped, [('warped_image', 'in_file')]),
         (skullstrip_epi, ds_mask, [('mask_file', 'in_file')]),
         (skullstrip_epi, ds_report, [('out_report', 'in_file')])
     ])
