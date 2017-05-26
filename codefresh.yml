@@ -10,10 +10,9 @@ steps:
     image: ${{build_image}}
     description: Downloading test data...
     environment:
-      - OSF_PROJECT="https://files.osf.io/v1/resources/fvuh8/providers/osfstorage"
-      - DS005_URL="${OSF_PROJECT}/57f32a429ad5a101f977eb75"
-      - DS005_FS_URL="${OSF_PROJECT}/58fe59eb594d900250960180"
-      - DS054_URL="${OSF_PROJECT}/57f32c22594d9001ef91bf9e"
+      - DS005_URL="https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/57f32a429ad5a101f977eb75"
+      - DS005_FS_URL="https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/58fe59eb594d900250960180"
+      - DS054_URL="https://files.osf.io/v1/resources/fvuh8/providers/osfstorage/57f32c22594d9001ef91bf9e"
     commands:
       - mkdir -p ${{CF_VOLUME_PATH}}/data
       - mkdir -p ${{CF_VOLUME_PATH}}/ds005/out

@@ -144,7 +144,8 @@ RUN pip install -r requirements.txt && \
     rm -rf ~/.cache/pip
 
 # Installing FMRIPREP
-COPY . /root/src/fmriprep
+COPY setup.py /root/src/fmriprep/setup.py
+COPY fmriprep /root/src/fmriprep/fmriprep
 RUN cd /root/src/fmriprep && \
     pip install .[all] && \
     rm -rf ~/.cache/pip
