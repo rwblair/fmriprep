@@ -2,7 +2,7 @@ version: '1.0'
 steps:
   build_image:
     type: build
-    description: Building the image ...
+    description: Building the image...
     image_name: poldracklab/fmriprep
     tag: develop # ${{CF_BRANCH}}
 
@@ -32,11 +32,16 @@ steps:
         fi'
   basic_test:
     image: ${{build_image}}
-    description: Checking if --version runs ...
+    description: Checking if --version runs...
     commands:
       - fmriprep --version
   unit_tests:
     image: ${{build_image}}
-    description: running unit tests ...
+    description: Running unit tests...
     commands:
       - python -m unittest discover test
+  ds000054:
+    image: ${{build_image}}
+    description: Processing ds000054...
+    commands:
+      - fmriprep ${{CF_VOLUME_PATH}}/data/ds054 /out/ participant --no-freesurfer --debug --write-graph
