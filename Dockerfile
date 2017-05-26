@@ -145,6 +145,7 @@ RUN pip install -r requirements.txt && \
 
 # Installing FMRIPREP
 COPY setup.py /root/src/fmriprep/setup.py
+COPY requirements.txt /root/src/fmriprep/requirements.txt
 COPY fmriprep /root/src/fmriprep/fmriprep
 RUN cd /root/src/fmriprep && \
     pip install .[all] && \

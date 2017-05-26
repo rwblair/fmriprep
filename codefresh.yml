@@ -20,15 +20,15 @@ steps:
       - mkdir -p ${{CF_VOLUME_PATH}}/docs
       - >- 
         bash -c 'if [[ ! -d ${{CF_VOLUME_PATH}}/data/ds005 ]]; 
-          then curl -sSLO "${DS005_URL}" | tar xz -C ${{CF_VOLUME_PATH}}/data/; 
+          then curl -sSL ${DS005_URL} | tar xz -C ${{CF_VOLUME_PATH}}/data/; 
         fi'
       - >- 
         bash -c 'if [[ ! -d ${{CF_VOLUME_PATH}}/data/ds054 ]]; 
-          then curl -sSLO "${DS054_URL}" | tar xz -C ${{CF_VOLUME_PATH}}/data/; 
+          then curl -sSL ${DS054_URL} | tar xz -C ${{CF_VOLUME_PATH}}/data/; 
         fi'
       - >- 
         bash -c 'if [[ ! -d ${{CF_VOLUME_PATH}}/data/freesurfer ]]; 
-          then curl -sSLO "${DS005_FS_URL}" | tar xz -C ${{CF_VOLUME_PATH}}/data/; 
+          then curl -sSL ${DS005_FS_URL} | tar xz -C ${{CF_VOLUME_PATH}}/data/; 
         fi'
   basic_test:
     image: ${{build_image}}
