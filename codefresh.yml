@@ -16,6 +16,8 @@ steps:
       - DS054_URL="${OSF_PROJECT}/57f32c22594d9001ef91bf9e"
     entry_point:
       - /bin/bash
+      - -c
+      - command
     commands:
       - mkdir -p ${{CF_VOLUME_PATH}}/data
       - mkdir -p ${{CF_VOLUME_PATH}}/ds005/out
