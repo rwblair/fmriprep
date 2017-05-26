@@ -7,7 +7,7 @@ steps:
     tag: develop # ${{CF_BRANCH}}
 
   basic_test:
-    image_name: poldracklab/fmriprep
+    image: poldracklab/fmriprep
     description: Cehck if --version runs ...
     commands:
       - fmriprep --version
