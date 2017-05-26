@@ -15,7 +15,7 @@ steps:
       - DS005_FS_URL="${OSF_PROJECT}/58fe59eb594d900250960180"
       - DS054_URL="${OSF_PROJECT}/57f32c22594d9001ef91bf9e"
     entry_point:
-      - /bin/bash
+      - bash
       - -c
       - command
     commands:
