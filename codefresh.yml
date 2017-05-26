@@ -35,3 +35,8 @@ steps:
     description: Checking if --version runs ...
     commands:
       - fmriprep --version
+  unit_tests:
+    image: ${{build_image}}
+    description: running unit tests ...
+    commands:
+      - python -m unittest discover test
