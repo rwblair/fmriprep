@@ -3,7 +3,7 @@ steps:
   build_image:
     type: build
     description: Building the image ...
-    image-name: poldracklab/fmriprep
+    image_name: poldracklab/fmriprep
     tag: develop # ${{CF_BRANCH}}
 
   download_test_data:
