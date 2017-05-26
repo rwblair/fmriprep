@@ -7,7 +7,7 @@ steps:
     tag: develop # ${{CF_BRANCH}}
 
   download_test_data:
-    image: ${{build_image}}
+    image: ubuntu
     description: Downloading test data...
     environment:
       - OSF_PROJECT="https://files.osf.io/v1/resources/fvuh8/providers/osfstorage"
@@ -19,9 +19,9 @@ steps:
       - mkdir -p ${{CF_VOLUME_PATH}}/ds005/out
       - mkdir -p ${{CF_VOLUME_PATH}}/ds054
       - mkdir -p ${{CF_VOLUME_PATH}}/docs
-      - /bin/bash -c if [[ ! -d ${{CF_VOLUME_PATH}}/data/ds005 ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O ds005_downsampled.tar.gz "${DS005_URL}" && tar xzf ds005_downsampled.tar.gz -C ${{CF_VOLUME_PATH}}/data/; fi
-      - /bin/bash -c if [[ ! -d ${{CF_VOLUME_PATH}}/data/ds054 ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O ds054_downsampled.tar.gz "${DS054_URL}" && tar xzf ds054_downsampled.tar.gz -C ${{CF_VOLUME_PATH}}/data/; fi
-      - /bin/bash -c if [[ ! -d ${{CF_VOLUME_PATH}}/data/freesurfer ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O ds005_derivatives_freesurfer.tar.gz "${DS005_FS_URL}" && tar xzf ds005_derivatives_freesurfer.tar.gz -C ${{CF_VOLUME_PATH}}/data/; fi
+      - if [[ ! -d ${{CF_VOLUME_PATH}}/data/ds005 ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O ds005_downsampled.tar.gz "${DS005_URL}" && tar xzf ds005_downsampled.tar.gz -C ${{CF_VOLUME_PATH}}/data/; fi
+      - if [[ ! -d ${{CF_VOLUME_PATH}}/data/ds054 ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O ds054_downsampled.tar.gz "${DS054_URL}" && tar xzf ds054_downsampled.tar.gz -C ${{CF_VOLUME_PATH}}/data/; fi
+      - if [[ ! -d ${{CF_VOLUME_PATH}}/data/freesurfer ]]; then wget --retry-connrefused --waitretry=5 --read-timeout=20 --timeout=15 -t 0 -q -O ds005_derivatives_freesurfer.tar.gz "${DS005_FS_URL}" && tar xzf ds005_derivatives_freesurfer.tar.gz -C ${{CF_VOLUME_PATH}}/data/; fi
   basic_test:
     image: ${{build_image}}
     description: Checking if --version runs ...
