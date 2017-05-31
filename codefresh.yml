@@ -44,4 +44,4 @@ steps:
     image: ${{build_image}}
     description: Processing ds000054...
     commands:
-      - fmriprep ${{CF_VOLUME_PATH}}/data/ds054 /out/ participant --no-freesurfer --debug --write-graph --n_proc 1 --omp-nthreads 1
+      - fmriprep ${{CF_VOLUME_PATH}}/data/ds054 /out/ participant --no-freesurfer --debug --write-graph --n_procs 1 --omp-nthreads 1
