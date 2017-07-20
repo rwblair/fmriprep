@@ -57,6 +57,7 @@ jobs:
             docker pull poldracklab/fmriprep:latest || true
             e=1 && for i in {1..5}; do docker build --cache-from=app --rm=false -t poldracklab/fmriprep:latest --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION=${CIRCLE_TAG:-latest} . && e=0 && break || sleep 15; done && [ "$e" -eq "0" ]
             pip install --upgrade wrapper/
+          timeout: 21600
       - run:
           name: Save docker image layer cache
           command: |
