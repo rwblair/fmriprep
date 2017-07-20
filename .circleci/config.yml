@@ -61,4 +61,4 @@ jobs:
       - run:
           name: Run tests
           command:
-          bash .circle/tests.sh :
+            bash .circle/tests.sh
