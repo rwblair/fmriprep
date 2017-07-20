@@ -3,7 +3,7 @@ machine:
 jobs:
   build:
     docker:
-      - image: docker:17.05.0-ce-git
+      - image: docker:17.06.0-ce-git
         environment:
           OSF_PROJECT: https://files.osf.io/v1/resources/fvuh8/providers/osfstorage
           DS005_URL: /57f32a429ad5a101f977eb75
@@ -19,6 +19,7 @@ jobs:
       - run:
           name: pre
           command: |
+            apk add --no-cache ca-certificates
             mkdir -p $HOME/data
             mkdir -p $HOME/ds005/out/
             mkdir -p $HOME/ds054
