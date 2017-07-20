@@ -18,6 +18,7 @@ jobs:
             apk update && apk add wget
             apk add python3
             apk add build-base
+            apk add python3-dev
       - run:
           name: pre
           command: |
