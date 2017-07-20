@@ -19,7 +19,7 @@ jobs:
       - run:
           name: pre
           command: |
-            apk add --no-cache ca-certificates
+            apk install python3
             mkdir -p $HOME/data
             mkdir -p $HOME/ds005/out/
             mkdir -p $HOME/ds054
@@ -31,10 +31,10 @@ jobs:
             cp -al $HOME/data/freesurfer $HOME/ds005/out/freesurfer
             printf "[execution]\nstop_on_first_crash = true\nremove_unnecessary_outputs = false" > $HOME/nipype.cfg
             # Setup dependencies
-            pip install future numpy
+            pip3 install future numpy
             # Verify we can run setup.py
-            python setup.py --help
-            python wrapper/setup.py --help
+            python3 setup.py --help
+            python3 wrapper/setup.py --help
       - restore_cache:
           keys:
             - v1-{{ .Branch }}
