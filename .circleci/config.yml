@@ -19,7 +19,7 @@ jobs:
       - run:
           name: pre
           command: |
-            apk install python3
+            apk add python3
             mkdir -p $HOME/data
             mkdir -p $HOME/ds005/out/
             mkdir -p $HOME/ds054
