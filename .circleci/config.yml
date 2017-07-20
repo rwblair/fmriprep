@@ -13,7 +13,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name pre
+          name: pre
           command: |
             mkdir -p $HOME/data
             mkdir -p $HOME/ds005/out && sudo setfacl -R -d -m group:ubuntu:rwx $HOME/ds005 && sudo setfacl -R -m group:ubuntu:rwx $HOME/ds005
