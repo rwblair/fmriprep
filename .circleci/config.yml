@@ -13,6 +13,10 @@ jobs:
     steps:
       - checkout
       - run:
+          name: install wget
+          command: |
+            apk update && apk add wget
+      - run:
           name: pre
           command: |
             mkdir -p $HOME/data
