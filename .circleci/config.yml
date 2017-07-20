@@ -20,7 +20,7 @@ jobs:
           name: pre
           command: |
             mkdir -p $HOME/data
-            mkdir -p $HOME/ds005/out/
+            mkdir -p $HOME/ds005/out/freesurfer
             mkdir -p $HOME/ds054
             mkdir -p $HOME/docs
             # Download test data
