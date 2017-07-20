@@ -37,6 +37,7 @@ jobs:
             # Verify we can run setup.py
             python3 setup.py --help
             python3 wrapper/setup.py --help
+      - setup_remote_docker
       - restore_cache:
           keys:
             - v1-{{ .Branch }}
