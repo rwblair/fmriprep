@@ -110,8 +110,8 @@ ENV PATH=/opt/ICA-AROMA-0.4-beta:$PATH
 
 # Installing and setting up miniconda
 RUN curl -sSLO https://repo.continuum.io/miniconda/Miniconda3-4.3.21-Linux-x86_64.sh && \
-    bash Miniconda3-4.3.11-Linux-x86_64.sh -b -p /usr/local/miniconda && \
-    rm Miniconda3-4.3.11-Linux-x86_64.sh
+    bash Miniconda3-4.3.21-Linux-x86_64.sh -b -p /usr/local/miniconda && \
+    rm Miniconda3-4.3.21-Linux-x86_64.sh
 
 ENV PATH=/usr/local/miniconda/bin:$PATH \
     LANG=C.UTF-8 \
