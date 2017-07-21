@@ -3,7 +3,7 @@ machine:
 jobs:
   build:
     docker:
-      - image: docker:17.06.0-ce-git
+      - image: ubuntu:xenial-20161213
         environment:
           OSF_PROJECT: https://files.osf.io/v1/resources/fvuh8/providers/osfstorage
           DS005_URL: /57f32a429ad5a101f977eb75
@@ -13,13 +13,20 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install Docker client
+          command: |
+            set -x
+            VER="17.03.0-ce"
+            curl -L -o /tmp/docker-$VER.tgz https://get.docker.com/builds/Linux/x86_64/docker-$VER.tgz
+            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+            mv /tmp/docker/* /usr/bin
+      - run:
           name: install pre reqs
           command: |
-            apk update && apk add wget
-            apk add python3
-            apk add build-base
-            apk add python3-dev
-            apk add cython
+            apt-get update && apt-get -y install python3 python3-dev cython build essential
+      - restore_cache:
+          keys:
+            - fmriprep-data
       - run:
           name: pre
           command: |
