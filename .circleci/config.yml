@@ -19,6 +19,7 @@ jobs:
             apk add python3
             apk add build-base
             apk add python3-dev
+            apk add cython
       - run:
           name: pre
           command: |
