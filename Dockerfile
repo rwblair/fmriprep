@@ -118,8 +118,8 @@ ENV PATH=/usr/local/miniconda/bin:$PATH \
     LC_ALL=C.UTF-8
 
 # Installing precomputed python packages
-RUN conda install -y mkl=2017.0.1 mkl-service &&  \
-    conda install -y numpy=1.12.0 \
+RUN conda install -y mkl=2017.0.1 mkl-service
+RUN conda install -y numpy=1.12.0 \
                      scipy=0.18.1 \
                      scikit-learn=0.18.1 \
                      matplotlib=2.0.0 \
