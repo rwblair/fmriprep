@@ -104,16 +104,16 @@ ENV PATH=/usr/local/miniconda/bin:$PATH \
 
 # Installing precomputed python packages
 RUN conda install -y mkl=2017.0.1 mkl-service
-RUN conda install -y numpy=1.12.0 \
-                     scipy=0.18.1 \
-                     scikit-learn=0.18.1 \
-                     matplotlib=2.0.0 \
-                     pandas=0.19.2 \
-                     libxml2=2.9.4 \
-                     libxslt=1.1.29\
-                     traits=4.6.0 &&  \
-    chmod +x /usr/local/miniconda/bin/* && \
-    conda clean --all -y
+RUN conda install -y numpy=1.12.0
+RUN conda install -y scipy=0.18.1
+RUN conda install -y scikit-learn=0.18.1 
+RUN conda install -y matplotlib=2.0.0 
+RUN conda install -y pandas=0.19.2 
+RUN conda install -y libxml2=2.9.4 
+RUN conda install -y libxslt=1.1.29
+RUN conda install -y traits=4.6.0
+RUN chmod +x /usr/local/miniconda/bin/* 
+RUN conda clean --all -y
 
 # Installing freesurfer
 RUN curl -sSL https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/6.0.0/freesurfer-Linux-centos6_x86_64-stable-pub-v6.0.0.tar.gz | tar zxv -C /opt \
