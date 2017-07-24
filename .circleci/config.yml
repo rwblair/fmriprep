@@ -81,3 +81,4 @@ jobs:
           name: Run tests
           command:
             bash .circle/tests.sh
+          parralelism: 2
