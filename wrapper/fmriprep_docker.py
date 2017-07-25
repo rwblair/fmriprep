@@ -294,7 +294,7 @@ def main():
         print('Could not detect memory capacity of Docker container.\n'
               'Do you have permission to run docker?')
         return 1
-    if mem_total < 8000:
+    if mem_total < 8000 and False:
         print('Warning: <8GB of RAM is available within your Docker '
               'environment.\nSome parts of fMRIprep may fail to complete.')
         resp = 'N'
