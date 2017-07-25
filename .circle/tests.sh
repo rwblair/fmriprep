@@ -47,3 +47,4 @@ case ${CIRCLE_NODE_INDEX} in
     find ~/ds005/scratch -not -name "*.svg" -not -name "*.html" -not -name "*.svg" -not -name "*.rst" -type f -delete
     ;;
 esac
+
