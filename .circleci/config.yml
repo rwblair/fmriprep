@@ -79,8 +79,8 @@ jobs:
           paths:
             - /caches/app.tar
       - run:
-          name: 
-          command: ds054 tests
+          name: ds054 tests
+          command: 
             fmriprep-docker -i poldracklab/fmriprep:latest --config $HOME/nipype.cfg -w $HOME/ds054/scratch $HOME/data/ds054 $HOME/ds054/out participant --no-freesurfer --debug --write-graph --force-syn && find ~/ds054/scratch -not -name "*.svg" -not -name "*.html" -not -name "*.svg" -not -name "*.rst" -type f -delete
       - run:
           name: ds005 tests
