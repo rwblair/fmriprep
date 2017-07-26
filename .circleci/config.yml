@@ -79,17 +79,18 @@ jobs:
           paths:
             - /caches/app.tar
       - run:
+          command: |
+  -v /root/data/ds054:/data:ro -v /root/ds054/out:/out -v /root/ds054/scratch:/scratch -v /root/nipype.cfg:/root/.nipype/nipype.cfg:ro 
+            docker create -v /out -v /scratch -v /root/.nipype/ -v /data --name data alpine:3.4 /bin/true
+            docker cp /root/data/ds054/*:/data
+            docker cp /root/nipype.cfg data:/root/.nipype/
+      - run:
           name: ds054 tests
           command: 
-            fmriprep-docker -i poldracklab/fmriprep:latest --config $HOME/nipype.cfg -w $HOME/ds054/scratch $HOME/data/ds054 $HOME/ds054/out participant --no-freesurfer --debug --write-graph --force-syn && find ~/ds054/scratch -not -name "*.svg" -not -name "*.html" -not -name "*.svg" -not -name "*.rst" -type f -delete
-      - run:
-          name: ds005 tests
-          command:
-            fmriprep-docker -i poldracklab/fmriprep:latest --config $HOME/nipype.cfg -w $HOME/ds005/scratch $HOME/data/ds005 $HOME/ds005/out participant --debug --write-graph --use-aroma --ignore-aroma-denoising-errors && find ~/ds005/scratch -not -name "*.svg" -not -name "*.html" -not -name "*.svg" -not -name "*.rst" -type f -delete
-      - run:
-          name: build docs
-          command:
-            docker run -ti --rm=false -v $HOME/docs:/_build_html --entrypoint=sphinx-build poldracklab/fmriprep:latest -T -E -b html -d _build/doctrees-readthedocs -W -D language=en docs/ /_build_html 2>&1 | tee $HOME/docs/builddocs.log && cat $HOME/docs/builddocs.log && if grep -q "ERROR" $HOME/docs/builddocs.log; then false; else true; fi && fmriprep-docker -i poldracklab/fmriprep:latest --help
+            docker run -it --volumes-from=data poldracklab/fmriprep:latest /data/ds054 /out participant --no-freesurfer --debug --write-graph --force-syn -w /scratch
+            docker cp data:/out /root/ds0054/
+            docker cp data:/scratch /root/ds0054
+            find ~/ds054/scratch -not -name "*.svg" -not -name "*.html" -not -name "*.svg" -not -name "*.rst" -type f -delete
       - run:
           name: unittests
           command:
