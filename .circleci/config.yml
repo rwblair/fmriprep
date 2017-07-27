@@ -81,7 +81,7 @@ jobs:
       - run:
           command: |
             docker create -v /out -v /scratch -v /root/.nipype/ -v /data --name data alpine:3.4 /bin/true
-            docker cp /root/data/ds054/*:/data
+            docker cp /root/data/ds054/ data:/data
             docker cp /root/nipype.cfg data:/root/.nipype/
       - run:
           name: ds054 tests
