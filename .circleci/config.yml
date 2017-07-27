@@ -74,7 +74,7 @@ jobs:
             docker save -o /caches/docker.tar poldracklab/fmriprep:latest
           no_output_timeout: 1200
       - save_cache:
-          key: v1-{{ .Branch }}-{{ checksum "Dockerfile" }}
+          key: v1-{{ .Branch }}-{{ checksum "Dockerfile" }}-{{ epoch }}
           paths:
             - /caches/docker.tar
       - restore_cache:
@@ -97,7 +97,7 @@ jobs:
             docker cp data:/scratch /root/ds0054
             find ~/ds054/scratch -not -name "*.svg" -not -name "*.html" -not -name "*.svg" -not -name "*.rst" -type f -delete
       - save_cache:
-          key: ds054-workdir-{{ .Branch }}
+          key: ds054-workdir-{{ .Branch }}-{{ epoch }}
           paths:
             - /root/ds0054/out
       - run:
