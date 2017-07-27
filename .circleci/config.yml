@@ -9,7 +9,6 @@ jobs:
           DS005_URL: /57f32a429ad5a101f977eb75
           DS005_FS_URL: /58fe59eb594d900250960180
           DS054_URL: /57f32c22594d9001ef91bf9e
-
     steps:
       - checkout
       - run:
@@ -49,9 +48,9 @@ jobs:
       - setup_remote_docker
       - restore_cache:
           keys:
-            - v1-{{ .Branch }}
+            - v1-{{ .Branch }}-{{ checksum  "Dockerfile" }}
           paths:
-            - /caches/app.tar
+            - /caches/docker.tar
       - run:
           name: Load Docker image layer cache
           command: |
@@ -75,7 +74,7 @@ jobs:
             docker save -o /caches/docker.tar poldracklab/fmriprep:latest
           no_output_timeout: 1200
       - save_cache:
-          key: v1-{{ .Branch }}
+          key: v1-{{ .Branch }}-{{ checksum "Dockerfile }}
           paths:
             - /caches/app.tar
       - run:
