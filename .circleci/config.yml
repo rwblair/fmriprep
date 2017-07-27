@@ -80,7 +80,6 @@ jobs:
             - /caches/app.tar
       - run:
           command: |
-  -v /root/data/ds054:/data:ro -v /root/ds054/out:/out -v /root/ds054/scratch:/scratch -v /root/nipype.cfg:/root/.nipype/nipype.cfg:ro 
             docker create -v /out -v /scratch -v /root/.nipype/ -v /data --name data alpine:3.4 /bin/true
             docker cp /root/data/ds054/*:/data
             docker cp /root/nipype.cfg data:/root/.nipype/
