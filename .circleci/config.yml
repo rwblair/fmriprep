@@ -76,7 +76,11 @@ jobs:
       - save_cache:
           key: v1-{{ .Branch }}-{{ checksum "Dockerfile" }}
           paths:
-            - /caches/app.tar
+            - /caches/docker.tar
+      - restore_cache:
+          key:  ds054-workdir-{{ .Branch }}
+          paths:
+            - /root/ds0054/out
       - run:
           command: |
             docker create -v /out -v /scratch -v /root/.nipype/ -v /data --name data alpine:3.4 /bin/true
@@ -86,9 +90,15 @@ jobs:
           name: ds054 tests
           command: |
             docker run -it --volumes-from=data poldracklab/fmriprep:latest /data/ds054 /out participant --no-freesurfer --debug --write-graph --force-syn -w /scratch
+      - run:
+          command: |
             docker cp data:/out /root/ds0054/
             docker cp data:/scratch /root/ds0054
             find ~/ds054/scratch -not -name "*.svg" -not -name "*.html" -not -name "*.svg" -not -name "*.rst" -type f -delete
+      - save_cache:
+          key: ds054-workdir-{{ .Branch }}
+          paths:
+            - /root/ds0054/out
       - run:
           name: unittests
           command:
