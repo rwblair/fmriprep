@@ -84,7 +84,7 @@ jobs:
             docker cp /root/nipype.cfg data:/root/.nipype/
       - run:
           name: ds054 tests
-          command: 
+          command: |
             docker run -it --volumes-from=data poldracklab/fmriprep:latest /data/ds054 /out participant --no-freesurfer --debug --write-graph --force-syn -w /scratch
             docker cp data:/out /root/ds0054/
             docker cp data:/scratch /root/ds0054
