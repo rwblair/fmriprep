@@ -90,6 +90,7 @@ jobs:
           name: ds054 tests
           command: |
             docker run -it --volumes-from=data poldracklab/fmriprep:latest /data/ds054 /out participant --no-freesurfer --debug --write-graph --force-syn -w /scratch
+          no_output_timeout: 3600
       - run:
           command: |
             docker cp data:/out /root/ds0054/
