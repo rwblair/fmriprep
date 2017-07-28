@@ -62,7 +62,7 @@ jobs:
           command: |
             sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" fmriprep/info.py
             sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" wrapper/fmriprep_docker.py
-            docker pull poldracklab/fmriprep:latest || true
+            docker pull poldracklab/fmriprep:latest
             docker build --cache-from=poldracklab/fmriprep --rm=false -t poldracklab/fmriprep:latest --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION=${CIRCLE_TAG:-latest} . 
             pip3 install --upgrade wrapper/
           no_output_timeout: 1200
@@ -81,6 +81,7 @@ jobs:
           key:  ds054-workdir-{{ .Branch }}
           paths:
             - /root/ds0054/out
+            - /root/ds054/scratch
       - run:
           command: |
             docker create -v /out -v /scratch -v /root/.nipype/ -v /data --name data alpine:3.4 /bin/true
@@ -97,9 +98,10 @@ jobs:
             docker cp data:/scratch /root/ds054
             find ~/ds054/scratch -not -name "*.svg" -not -name "*.html" -not -name "*.svg" -not -name "*.rst" -type f -delete
       - save_cache:
-          key: ds054-workdir-{{ .Branch }}-{{ checksum "Dockerfile" }}-{{ epoch }}
+          key: ds054-workdir-{{ .Branch }}-{{ epoch }}
           paths:
             - /root/ds054/out
+            - /root/ds054/scratch
       - run:
           name: unittests
           command:
