@@ -93,13 +93,13 @@ jobs:
           no_output_timeout: 3600
       - run:
           command: |
-            docker cp data:/out /root/ds0054/
-            docker cp data:/scratch /root/ds0054
+            docker cp data:/out /root/ds054/
+            docker cp data:/scratch /root/ds054
             find ~/ds054/scratch -not -name "*.svg" -not -name "*.html" -not -name "*.svg" -not -name "*.rst" -type f -delete
       - save_cache:
           key: ds054-workdir-{{ .Branch }}-{{ epoch }}
           paths:
-            - /root/ds0054/out
+            - /root/ds054/out
       - run:
           name: unittests
           command:
