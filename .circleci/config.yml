@@ -97,7 +97,7 @@ jobs:
             docker cp data:/scratch /root/ds054
             find ~/ds054/scratch -not -name "*.svg" -not -name "*.html" -not -name "*.svg" -not -name "*.rst" -type f -delete
       - save_cache:
-          key: ds054-workdir-{{ .Branch }}-{{ epoch }}
+          key: ds054-workdir-{{ .Branch }}-{{ checksum "Dockerfile" }}-{{ epoch }}
           paths:
             - /root/ds054/out
       - run:
