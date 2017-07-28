@@ -63,7 +63,7 @@ jobs:
             sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" fmriprep/info.py
             sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" wrapper/fmriprep_docker.py
             docker pull poldracklab/fmriprep:latest
-            docker build --cache-from=poldracklab/fmriprep --rm=false -t poldracklab/fmriprep:latest --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION=${CIRCLE_TAG:-latest} . 
+            docker build --cache-from=poldracklab/fmriprep -t poldracklab/fmriprep:latest --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION=${CIRCLE_TAG:-latest} . 
             pip3 install --upgrade wrapper/
           no_output_timeout: 1200
           timeout: 21600
