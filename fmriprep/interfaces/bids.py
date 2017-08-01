@@ -7,6 +7,18 @@
 # @Date:   2016-06-03 09:35:13
 # @Last Modified by:   oesteban
 # @Last Modified time: 2017-02-13 11:44:23
+"""
+Interfaces for handling BIDS-like neuroimaging structures
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Fetch some example data:
+
+    >>> import os
+    >>> from niworkflows import data
+    >>> data_root = data.get_bids_examples(variant='BIDS-examples-1-enh-ds054')
+    >>> os.chdir(data_root)
+
+"""
 from __future__ import print_function, division, absolute_import, unicode_literals
 
 import os
@@ -23,17 +35,41 @@ from niworkflows.nipype.interfaces.base import (
 from builtins import str, bytes
 
 from niworkflows.interfaces.base import SimpleInterface
-from fmriprep.utils.misc import make_folder
 
 LOGGER = logging.getLogger('interface')
 BIDS_NAME = re.compile(
-    '^(.*\/)?(?P<subject_id>sub-[a-zA-Z0-9]+)(_(?P<ses_id>ses-[a-zA-Z0-9]+))?'
+    '^(.*\/)?(?P<subject_id>sub-[a-zA-Z0-9]+)(_(?P<session_id>ses-[a-zA-Z0-9]+))?'
     '(_(?P<task_id>task-[a-zA-Z0-9]+))?(_(?P<acq_id>acq-[a-zA-Z0-9]+))?'
     '(_(?P<rec_id>rec-[a-zA-Z0-9]+))?(_(?P<run_id>run-[a-zA-Z0-9]+))?')
 
 
 class FileNotFoundError(IOError):
     pass
+
+
+class BIDSInfoInputSpec(BaseInterfaceInputSpec):
+    in_file = File(mandatory=True, desc='input file, part of a BIDS tree')
+
+
+class BIDSInfoOutputSpec(TraitedSpec):
+    subject_id = traits.Str()
+    session_id = traits.Str()
+    task_id = traits.Str()
+    acq_id = traits.Str()
+    rec_id = traits.Str()
+    run_id = traits.Str()
+
+
+class BIDSInfo(SimpleInterface):
+    input_spec = BIDSInfoInputSpec
+    output_spec = BIDSInfoOutputSpec
+
+    def _run_interface(self, runtime):
+        match = BIDS_NAME.search(self.inputs.in_file)
+        params = match.groupdict() if match is not None else {}
+        self._results = {key: val for key, val in list(params.items())
+                         if val is not None}
+        return runtime
 
 
 class BIDSDataGrabberInputSpec(BaseInterfaceInputSpec):
@@ -44,7 +80,7 @@ class BIDSDataGrabberInputSpec(BaseInterfaceInputSpec):
 class BIDSDataGrabberOutputSpec(TraitedSpec):
     out_dict = traits.Dict(desc='output data structure')
     fmap = OutputMultiPath(desc='output fieldmaps')
-    func = OutputMultiPath(desc='output functional images')
+    bold = OutputMultiPath(desc='output functional images')
     sbref = OutputMultiPath(desc='output sbrefs')
     t1w = OutputMultiPath(desc='output T1w images')
     t2w = OutputMultiPath(desc='output T2w images')
@@ -71,12 +107,12 @@ class BIDSDataGrabber(SimpleInterface):
             raise FileNotFoundError('No T1w images found for subject sub-{}'.format(
                 self.inputs.subject_id))
 
-        self._results['func'] = bids_dict['func']
-        if self._require_funcs and not bids_dict['func']:
+        self._results['bold'] = bids_dict['bold']
+        if self._require_funcs and not bids_dict['bold']:
             raise FileNotFoundError('No functional images found for subject sub-{}'.format(
                 self.inputs.subject_id))
 
-        for imtype in ['func', 't2w', 'fmap', 'sbref']:
+        for imtype in ['bold', 't2w', 'fmap', 'sbref']:
             self._results[imtype] = bids_dict[imtype]
             if not bids_dict[imtype]:
                 LOGGER.warn('No \'{}\' images found for sub-{}'.format(
@@ -100,6 +136,24 @@ class DerivativesDataSinkOutputSpec(TraitedSpec):
 
 
 class DerivativesDataSink(SimpleInterface):
+    """
+    Saves the `in_file` into a BIDS-Derivatives folder provided
+    by `base_directory`, given the input reference `source_file`.
+
+    >>> import tempfile
+    >>> from fmriprep.utils.bids import collect_data
+    >>> tmpdir = tempfile.mkdtemp()
+    >>> tmpfile = os.path.join(tmpdir, 'a_temp_file.nii.gz')
+    >>> open(tmpfile, 'w').close()  # "touch" the file
+    >>> dsink = DerivativesDataSink(base_directory=tmpdir)
+    >>> dsink.inputs.in_file = tmpfile
+    >>> dsink.inputs.source_file = collect_data('ds114', '01')['t1w'][0]
+    >>> dsink.inputs.suffix = 'target-mni'
+    >>> res = dsink.run()
+    >>> res.outputs.out_file  # doctest: +ELLIPSIS
+    '.../fmriprep/sub-01/ses-retest/anat/sub-01_ses-retest_T1w_target-mni.nii.gz'
+
+    """
     input_spec = DerivativesDataSinkInputSpec
     output_spec = DerivativesDataSinkOutputSpec
     out_path_base = "fmriprep"
@@ -132,13 +186,13 @@ class DerivativesDataSink(SimpleInterface):
             base_directory = op.abspath(self.inputs.base_directory)
 
         out_path = '{}/{subject_id}'.format(self.out_path_base, **m.groupdict())
-        if m.groupdict().get('ses_id') is not None:
-            out_path += '/{ses_id}'.format(**m.groupdict())
+        if m.groupdict().get('session_id') is not None:
+            out_path += '/{session_id}'.format(**m.groupdict())
         out_path += '/{}'.format(mod)
 
         out_path = op.join(base_directory, out_path)
 
-        make_folder(out_path)
+        os.makedirs(out_path, exist_ok=True)
 
         base_fname = op.join(out_path, fname)
 
@@ -235,7 +289,7 @@ class BIDSFreeSurferDir(SimpleInterface):
     def _run_interface(self, runtime):
         subjects_dir = os.path.join(self.inputs.derivatives,
                                     self.inputs.subjects_dir)
-        make_folder(subjects_dir)
+        os.makedirs(subjects_dir, exist_ok=True)
         self._results['subjects_dir'] = subjects_dir
 
         spaces = list(self.inputs.spaces)
