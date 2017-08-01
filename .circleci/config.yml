@@ -24,9 +24,6 @@ jobs:
             curl -L -o /tmp/docker-$VER.tgz https://get.docker.com/builds/Linux/x86_64/docker-$VER.tgz
             tar -xz -C /tmp -f /tmp/docker-$VER.tgz
             mv /tmp/docker/* /usr/bin
-      - restore_cache:
-          keys:
-            - fmriprep-data
       - run:
           name: pre
           command: |
@@ -46,32 +43,17 @@ jobs:
             python3 setup.py --help
             python3 wrapper/setup.py --help
       - setup_remote_docker
-      - restore_cache:
-          keys:
-            - v1-{{ .Branch }}-{{ checksum  "Dockerfile" }}
-          paths:
-            - /caches/docker.tar
       - run:
           name: Build docker image
           command: |
             sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" fmriprep/info.py
             sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" wrapper/fmriprep_docker.py
             set +o pipefail
-            docker load -i /caches/docker.tar || true
-            docker build --cache-from=poldracklab/fmriprep:latest -t poldracklab/fmriprep:latest --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION=${CIRCLE_TAG:-latest} . 
+            docker pull poldracklab/fmriprep:latest || true
+            docker build -t poldracklab/fmriprep:latest --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --build-arg VERSION=${CIRCLE_TAG:-latest} . 
             pip3 install --upgrade wrapper/
           no_output_timeout: 1200
           timeout: 21600
-      - run:
-          name: Save docker image layer cache
-          command: |
-            mkdir -p /caches
-            docker save -o /caches/docker.tar poldracklab/fmriprep:latest
-          no_output_timeout: 1200
-      - save_cache:
-          key: v1-{{ .Branch }}-{{ checksum "Dockerfile" }}-{{ epoch }}
-          paths:
-            - /caches/docker.tar
       - restore_cache:
           key:  ds054-workdir-{{ .Branch }}
           paths:
@@ -85,7 +67,7 @@ jobs:
       - run:
           name: ds054 tests
           command: |
-            docker run -it --volumes-from=data poldracklab/fmriprep:latest /data/ds054 /out participant --no-freesurfer --debug --write-graph --force-syn -w /scratch
+            false && docker run -it --volumes-from=data poldracklab/fmriprep:latest /data/ds054 /out participant --no-freesurfer --debug --write-graph --force-syn -w /scratch
           no_output_timeout: 3600
       - run:
           command: |
